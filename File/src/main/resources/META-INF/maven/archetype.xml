@@ -1,0 +1,6 @@
+<archetype>
+  <id>File</id>
+  <sources>
+    <source>src/main/java/com/innowise/FileApplication.java</source>
+  </sources>
+</archetype>

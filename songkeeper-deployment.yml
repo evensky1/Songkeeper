@@ -1,0 +1,84 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: songkeeper-deployment
+  labels:
+    app: songkeeper
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: songkeeper
+  template:
+    metadata:
+      labels:
+        app: songkeeper
+    spec:
+      containers:
+        - name: auth-service
+          image: auth-service:v1
+          ports:
+            - containerPort: 8081
+          env:
+            - name: JWT_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: songkeeper-secret
+                  key: jwt-key
+        - name: file-service
+          image: file-service:v1
+          ports:
+            - containerPort: 8082
+          env:
+            - name: STORAGE_PATH
+              value: /tmp/songs
+        - name: enricher-service
+          image: enricher-service:v1
+          ports:
+            - containerPort: 8083
+        - name: integrator-service
+          image: integrator-service:v1
+          ports:
+            - containerPort: 8085
+          env:
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: songkeeper-secret
+                  key: aws-access-key-id
+            - name: AWS_DEFAULT_REGION
+              value: us-east-1
+            - name: AWS_REGION
+              value: us-east-1
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: songkeeper-secret
+                  key: aws-secret
+            - name: ENRICHER_SERVICE_HOST
+              value: localhost
+            - name: ENRICHER_SERVICE_PORT
+              value: 8082
+            - name: ENRICHER_TO_SONG_QUEUE_URL
+              value: http://localhost:4566/000000000000/enricher-to-song.fifo
+            - name: FILE_TO_ENRICHER_QUEUE_URL
+              value: http://localhost:4566/000000000000/file-to-enricher.fifo
+            - name: SONG_SERVICE_HOST
+              value: localhost
+            - name: SONG_SERVICE_PORT
+              value: 8087
+            - name: SPOTIFY_AUTH_URL
+              value: https://accounts.spotify.com/api/token
+            - name: SPOTIFY_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: songkeeper-secret
+                  key: spotify-client-id
+        - name: song-service
+          image: song-service:v1
+          ports:
+            - containerPort: 8087
+        - name: config-service
+          image: config-service:v1
+          ports:
+            - containerPort: 8088

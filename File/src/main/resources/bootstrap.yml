@@ -1,0 +1,5 @@
+spring:
+  application:
+    name: File
+  config:
+    import: configserver:${SPRING_CONFIG_URI:http://localhost:8088}

@@ -1,0 +1,5 @@
+server:
+  port: 8085
+camel:
+  springboot:
+    routes-include-pattern: classpath:/integrator/*

@@ -1,0 +1,24 @@
+version: "2"
+
+services:
+  auth:
+    build:
+      context: Auth/
+    restart: on-failure
+    ports:
+        - "8081:8081"
+    depends_on:
+        - postgres
+  postgres:
+    container_name: postgres
+    image: postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres:/var/lib/postgresql/data
+
+volumes:
+  postgres: {}
